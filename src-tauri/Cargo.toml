@@ -21,6 +21,7 @@ tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
+axum = { version = "0.7", features = ["multipart"] }
 # TLS 用 native-tls 而不是 rustls：rustls 依赖 ring，ring 需要 C 编译器，
 # 而本机环境变量 CC 被污染成 E:\ClaudeCode\cc-haha-main\bin（一个目录），
 # cc-rs 会直接失败。native-tls 在 Windows 上走 SChannel，纯 Rust 绑定，不碰 C 工具链。

@@ -137,6 +137,12 @@ export const comfyCancelPrompt = (promptId: string) => invoke<string>("comfy_can
 export const comfyQueue = () =>
   invoke<{ queue_running: unknown[]; queue_pending: unknown[] }>("comfy_queue");
 
+// ---------------------------------------------------------------- RolePlayChat LAN bridge
+
+export const lanPairingCode = () => invoke<string>("lan_pairing_code");
+export const lanDevices = () => invoke<Array<{ deviceId: string; deviceName: string; appInstanceId: string; createdAt: number; lastSeenAt: number }>>("lan_devices");
+export const lanRevokeDevice = (deviceId: string) => invoke<boolean>("lan_revoke_device", { deviceId });
+
 // ---------------------------------------------------------------- 任务
 
 export const uploadImage = (path: string) =>

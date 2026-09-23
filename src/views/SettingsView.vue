@@ -18,6 +18,9 @@ import {
   Lock,
   ShieldCheck,
   Plug,
+  Smartphone,
+  Copy,
+  Trash2,
 } from "lucide-vue-next";
 import {
   pickDirectory,
@@ -28,6 +31,9 @@ import {
   storeDirPath,
   appPaths,
   deepseekModels,
+  lanPairingCode,
+  lanDevices,
+  lanRevokeDevice,
 } from "../api/tauri";
 import { settings, saveSettings, resetSettings, SIZE_PRESETS, dataDir } from "../stores/settings";
 import { backend, refreshLogs } from "../stores/backend";
@@ -44,6 +50,8 @@ const checkResult = ref<{ name: string; folder: string; ok: boolean }[]>([]);
 const stats = ref("");
 const storeDir = ref("");
 const version = ref("");
+const pairingCode = ref("");
+const pairedDevices = ref<Array<{ deviceId: string; deviceName: string; appInstanceId: string; createdAt: number; lastSeenAt: number }>>([]);
 
 // DeepSeek
 const showKey = ref(false);
@@ -79,7 +87,23 @@ onMounted(async () => {
     version.value = "1.1.1";
   }
   await refreshStats();
+  try {
+    pairingCode.value = await lanPairingCode();
+    pairedDevices.value = await lanDevices();
+  } catch { /* older backend */ }
 });
+
+async function revokeDevice(deviceId: string) {
+  if (!(await lanRevokeDevice(deviceId))) return;
+  pairedDevices.value = pairedDevices.value.filter((d) => d.deviceId !== deviceId);
+  emit("toast", "已删除调用端");
+}
+
+async function copyPairingCode() {
+  if (!pairingCode.value) return;
+  await navigator.clipboard?.writeText(pairingCode.value);
+  emit("toast", "配对码已复制");
+}
 
 /**
  * 连点版本号 5 下唤出隐私空间解锁框。
@@ -228,6 +252,29 @@ async function selfCheck() {
         </div>
         <div class="hint">设置、历史记录、图库索引和缩略图缓存在这里。</div>
       </div>
+    </div>
+
+    <!-- RolePlayChat LAN bridge -->
+    <div class="card">
+      <h3 class="card-title"><Smartphone :size="14" /> RolePlayChat 局域网调用</h3>
+      <div class="hint" style="margin-bottom: 10px">
+        服务随 Huajing 启动，监听本机局域网端口 17890。RolePlayChat 首次配对后可长期调用，删除调用端后令牌立即失效。
+      </div>
+      <div class="field">
+        <label class="label">首次配对码</label>
+        <div class="flex">
+          <input :value="pairingCode || '读取中…'" class="input mono" readonly />
+          <button class="btn ghost" @click="copyPairingCode"><Copy :size="13" /> 复制</button>
+        </div>
+      </div>
+      <div class="field" v-if="pairedDevices.length">
+        <label class="label">已配对调用端</label>
+        <div v-for="device in pairedDevices" :key="device.deviceId" class="flex" style="margin-top: 6px">
+          <span class="mono" style="flex: 1">{{ device.deviceName }} · {{ device.deviceId.slice(0, 8) }}</span>
+          <button class="btn ghost" @click="revokeDevice(device.deviceId)"><Trash2 :size="13" /> 删除</button>
+        </div>
+      </div>
+      <div class="hint">电脑端删除调用端后，手机需要重新配对；日常生成不需要重复扫码。</div>
     </div>
 
     <!-- 界面视觉风格 -->

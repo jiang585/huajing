@@ -10,6 +10,7 @@ pub mod comfy;
 pub mod video;
 pub mod deepseek;
 pub mod vault;
+pub mod lan;
 
 use std::path::PathBuf;
 
@@ -50,6 +51,8 @@ pub fn run() {
                 .unwrap_or_else(|| PathBuf::from(comfy::DEFAULT_COMFY_ROOT));
             app.manage(comfy::ComfyState::new(root));
             app.manage(vault::VaultState::new());
+            let lan_state = lan::start(app.handle().clone());
+            app.manage(lan_state);
 
             // 把进度通道拉起来。稍微等一下，让前端有时间挂上事件监听。
             let handle = app.handle().clone();
@@ -114,6 +117,9 @@ pub fn run() {
             vault::vault_preview,
             vault::vault_save_as,
             vault::vault_name,
+            lan::lan_pairing_code,
+            lan::lan_devices,
+            lan::lan_revoke_device,
         ])
         .run(tauri::generate_context!())
         .expect("画境启动失败");
