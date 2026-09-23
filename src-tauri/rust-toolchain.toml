@@ -1,0 +1,9 @@
+# 必须用 MSVC 工具链。
+#
+# 默认的 stable-x86_64-pc-windows-gnu 会去 PATH 里找 x86_64-w64-mingw32-gcc，
+# 而 PATH 最前面是 E:\Dev-Cpp\MinGW64（gcc 4.9.2），它的 ld 不认识 rustc 1.98
+# 传的 --high-entropy-va，链接必然失败。
+# 本机已装 VS 2022 BuildTools（含 VC Tools + Windows SDK），MSVC 是 Tauri 在
+# Windows 上的正确工具链，因此在这里固定下来，避免每次构建踩同一个坑。
+[toolchain]
+channel = "stable-x86_64-pc-windows-msvc"

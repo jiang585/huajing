@@ -1,0 +1,49 @@
+[package]
+name = "huajing"
+version = "1.1.1"
+description = "画境 — 基于 ComfyUI 的本地 AI 影像工作台"
+authors = ["huajing"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "huajing_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# protocol-asset：前端要用 asset 协议直接加载本地图片，必须开这个 feature，
+# 否则 tauri.conf.json 里启用 assetProtocol 会在构建时报 allowlist 不匹配。
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+# TLS 用 native-tls 而不是 rustls：rustls 依赖 ring，ring 需要 C 编译器，
+# 而本机环境变量 CC 被污染成 E:\ClaudeCode\cc-haha-main\bin（一个目录），
+# cc-rs 会直接失败。native-tls 在 Windows 上走 SChannel，纯 Rust 绑定，不碰 C 工具链。
+reqwest = { version = "0.12", default-features = false, features = ["json", "multipart", "stream", "native-tls"] }
+futures-util = "0.3"
+base64 = "0.22"
+dirs = "5"
+open = "5"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "bmp"] }
+
+# 隐私空间：AES-256-GCM 加密 + PBKDF2-HMAC-SHA256 派生密钥
+aes-gcm = "0.10"
+pbkdf2 = { version = "0.12", default-features = false, features = ["hmac"] }
+hmac = "0.12"
+sha2 = "0.10"
+rand = "0.8"
+zeroize = "1"
+
+[profile.release]
+# 用 thin LTO 而不是全量 LTO + codegen-units=1：构建快得多，体积差别很小。
+# 也不开 panic="abort" —— Tauri 内部有依赖栈展开的地方，abort 会出问题。
+lto = "thin"
+opt-level = "s"
+strip = true

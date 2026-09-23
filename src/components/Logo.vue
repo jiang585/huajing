@@ -1,0 +1,68 @@
+<script setup lang="ts">
+/**
+ * 应用标识：一笔画成的八角窗 + 毛笔笔锋。
+ *
+ * 与 src-tauri/icons/icon.svg 同一套图形，这里内联是为了让界面里的标记
+ * 和任务栏/安装包图标完全一致，并且矢量缩放到任意尺寸都清晰。
+ * 渐变 id 加了 hj- 前缀，避免和页面上其它 SVG 撞名。
+ */
+
+defineProps<{ size?: number }>();
+</script>
+
+<template>
+  <svg
+    :width="size ?? 30"
+    :height="size ?? 30"
+    viewBox="0 0 1024 1024"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-label="画境"
+  >
+    <defs>
+      <linearGradient id="hj-bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7f5eff" />
+        <stop offset="50%" stop-color="#574af0" />
+        <stop offset="100%" stop-color="#2f57e6" />
+      </linearGradient>
+      <radialGradient id="hj-sheen" cx="0.26" cy="0.18" r="0.8">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18" />
+        <stop offset="62%" stop-color="#ffffff" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="hj-brush" x1="0.12" y1="0.12" x2="0.86" y2="0.9">
+        <stop offset="0%" stop-color="#ffffff" />
+        <stop offset="62%" stop-color="#ffffff" />
+        <stop offset="100%" stop-color="#d9d2ff" />
+      </linearGradient>
+      <clipPath id="hj-card">
+        <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" />
+      </clipPath>
+    </defs>
+
+    <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#hj-bg)" />
+    <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#hj-sheen)" />
+
+    <g
+      clip-path="url(#hj-card)"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+      stroke="#ffffff"
+    >
+      <path d="M214.5 623.2 L214.5 376.8 L388.8 202.5" stroke-width="58" opacity="0.97" />
+      <path d="M388.8 202.5 L635.2 202.5 L809.5 376.8" stroke-width="38" opacity="0.94" />
+      <path d="M809.5 376.8 L809.5 623.2 L635.2 797.5 L388.8 797.5" stroke-width="22" opacity="0.9" />
+      <circle cx="196" cy="508" r="11" fill="#ffffff" stroke="none" opacity="0.4" />
+      <circle cx="246" cy="704" r="7" fill="#ffffff" stroke="none" opacity="0.28" />
+      <circle cx="860" cy="502" r="8" fill="#ffffff" stroke="none" opacity="0.24" />
+    </g>
+
+    <path
+      d="M528 440 C 456 520, 376 688, 284 728 C 376 688, 492 612, 616 522 C 664 486, 636 424, 528 440 Z"
+      fill="url(#hj-brush)"
+      opacity="0.98"
+    />
+    <circle cx="238" cy="752" r="10" fill="#ffffff" opacity="0.46" />
+    <circle cx="350" cy="782" r="6" fill="#ffffff" opacity="0.32" />
+    <circle cx="172" cy="686" r="5" fill="#ffffff" opacity="0.28" />
+  </svg>
+</template>

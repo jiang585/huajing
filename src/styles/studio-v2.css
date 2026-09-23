@@ -1,0 +1,1149 @@
+/* ==========================================================================
+   画境 2.0 灵境美学设计系统 (HUAJING NEXT STUDIO AESTHETICS)
+   Ultra-refined Neo-Dark Studio UI with Ambient Mesh Glow, Frosted Glassmorphism,
+   Tactile Micro-interactions, and Cinematic Visual Hierarchy.
+   ========================================================================== */
+
+/* 2.0 专属设计变量 */
+:root[data-edition="v2"],
+.studio-shell {
+  --st-bg: #07080c;
+  --st-bg-surface-1: #0d1017;
+  --st-bg-surface-2: #131722;
+  --st-bg-surface-3: #1a2030;
+  --st-bg-glass: rgba(13, 16, 25, 0.75);
+  --st-bg-glass-card: rgba(17, 22, 35, 0.65);
+  --st-bg-glass-hover: rgba(28, 35, 54, 0.7);
+
+  --st-border-subtle: rgba(255, 255, 255, 0.06);
+  --st-border: rgba(255, 255, 255, 0.09);
+  --st-border-strong: rgba(255, 255, 255, 0.16);
+  --st-border-glow: rgba(139, 92, 246, 0.45);
+
+  --st-text-primary: #f8fafc;
+  --st-text-secondary: #94a3b8;
+  --st-text-muted: #64748b;
+  --st-text-dim: #475569;
+
+  --st-iris: #8b5cf6;
+  --st-iris-light: #a78bfa;
+  --st-iris-glow: rgba(139, 92, 246, 0.35);
+  --st-iris-gradient: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #4f46e5 100%);
+  --st-iris-gradient-hover: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #581c87 100%);
+  --st-iris-soft: rgba(139, 92, 246, 0.12);
+
+  --st-cyan: #06b6d4;
+  --st-cyan-glow: rgba(6, 182, 212, 0.3);
+  --st-emerald: #10b981;
+  --st-emerald-soft: rgba(16, 185, 129, 0.14);
+  --st-amber: #f59e0b;
+  --st-rose: #f43f5e;
+  --st-rose-soft: rgba(244, 63, 94, 0.14);
+
+  --st-radius-xs: 6px;
+  --st-radius-sm: 8px;
+  --st-radius-md: 12px;
+  --st-radius-lg: 16px;
+  --st-radius-xl: 22px;
+
+  --st-shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  --st-shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --st-shadow-glow: 0 0 25px rgba(124, 58, 237, 0.35);
+  --st-shadow-cyan-glow: 0 0 25px rgba(6, 182, 212, 0.3);
+
+  --st-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+}
+
+/* 2.0 整体壳容器 */
+.studio-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--st-bg);
+  background-image: 
+    radial-gradient(ellipse 70% 40% at 20% -10%, rgba(99, 102, 241, 0.12), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(139, 92, 246, 0.09), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(6, 182, 212, 0.03), transparent 70%);
+  color: var(--st-text-primary);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* 侧边栏 */
+.studio-sidebar {
+  width: 220px;
+  flex: 0 0 220px;
+  background: var(--st-bg-surface-1);
+  border-right: 1px solid var(--st-border-subtle);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 20;
+  backdrop-filter: blur(20px);
+}
+
+.studio-brand-wrap {
+  padding: 18px 18px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--st-border-subtle);
+  position: relative;
+}
+
+.studio-logo-glow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.studio-logo-glow::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  background: var(--st-iris-gradient);
+  border-radius: 12px;
+  z-index: -1;
+  opacity: 0.6;
+  filter: blur(8px);
+  animation: pulse-aura 4s ease-in-out infinite;
+}
+
+@keyframes pulse-aura {
+  0%, 100% { opacity: 0.4; filter: blur(6px); }
+  50% { opacity: 0.8; filter: blur(10px); }
+}
+
+.studio-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.studio-brand-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, #ffffff 40%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studio-badge-v2 {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--st-iris-gradient);
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.studio-brand-sub {
+  font-size: 11px;
+  color: var(--st-text-muted);
+  letter-spacing: 0.03em;
+  margin-top: 1px;
+}
+
+/* 导航区 */
+.studio-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.studio-nav-group-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--st-text-dim);
+  padding: 12px 10px 6px;
+  letter-spacing: 0.08em;
+}
+
+.studio-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--st-radius-md);
+  color: var(--st-text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+}
+
+.studio-nav-item:hover {
+  background: var(--st-bg-surface-2);
+  color: var(--st-text-primary);
+  border-color: var(--st-border-subtle);
+  transform: translateX(2px);
+}
+
+.studio-nav-item.active {
+  background: rgba(139, 92, 246, 0.12);
+  color: #ffffff;
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 14px -2px rgba(124, 58, 237, 0.25);
+}
+
+.studio-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3.5px;
+  border-radius: 0 4px 4px 0;
+  background: var(--st-iris-gradient);
+  box-shadow: 0 0 10px var(--st-iris);
+}
+
+.studio-nav-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 12px;
+  background: var(--st-bg-surface-3);
+  color: var(--st-text-muted);
+  border: 1px solid var(--st-border-subtle);
+}
+
+.studio-nav-item.active .studio-nav-badge {
+  background: rgba(139, 92, 246, 0.25);
+  color: var(--st-iris-light);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* 侧边栏底部状态栏 */
+.studio-sidebar-footer {
+  padding: 12px 14px;
+  border-top: 1px solid var(--st-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--st-text-dim);
+}
+
+/* 主内容区 */
+.studio-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 顶栏 */
+.studio-topbar {
+  height: 58px;
+  flex: 0 0 58px;
+  border-bottom: 1px solid var(--st-border-subtle);
+  background: rgba(13, 16, 23, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  z-index: 10;
+}
+
+.studio-topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.studio-topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--st-text-primary);
+}
+
+.studio-topbar-tagline {
+  font-size: 12px;
+  color: var(--st-text-muted);
+  border-left: 1px solid var(--st-border);
+  padding-left: 12px;
+}
+
+.studio-topbar-spacer {
+  flex: 1;
+}
+
+/* 版本切换胶囊 (Edition Switcher) */
+.studio-edition-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--st-bg-surface-2);
+  border: 1px solid var(--st-border);
+  border-radius: 20px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.studio-edition-btn {
+  border: none;
+  background: transparent;
+  color: var(--st-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.16s ease;
+}
+
+.studio-edition-btn:hover {
+  color: var(--st-text-primary);
+}
+
+.studio-edition-btn.active {
+  background: var(--st-iris-gradient);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+}
+
+.studio-edition-btn.active.classic {
+  background: var(--st-bg-surface-3);
+  color: var(--st-text-primary);
+  box-shadow: none;
+}
+
+/* 内容滚动区 */
+.studio-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 26px 36px;
+}
+
+/* ==========================================================================
+   2.0 卡片与容器风格
+   ========================================================================== */
+.studio-card {
+  background: var(--st-bg-glass-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius-lg);
+  padding: 20px;
+  box-shadow: var(--st-shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.studio-card:hover {
+  border-color: rgba(255, 255, 255, 0.13);
+}
+
+.studio-card-glow {
+  position: relative;
+}
+.studio-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), transparent 40%, rgba(6, 182, 212, 0.15));
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.studio-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.studio-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--st-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.studio-card-subtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--st-text-muted);
+}
+
+/* ==========================================================================
+   2.0 按钮体系
+   ========================================================================== */
+.st-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 15px;
+  border-radius: var(--st-radius-md);
+  border: 1px solid var(--st-border);
+  background: var(--st-bg-surface-2);
+  color: var(--st-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.st-btn:hover:not(:disabled) {
+  background: var(--st-bg-surface-3);
+  border-color: var(--st-border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.st-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.st-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.st-btn-primary {
+  background: var(--st-iris-gradient);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.st-btn-primary:hover:not(:disabled) {
+  background: var(--st-iris-gradient-hover);
+  border-color: var(--st-iris);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1.5px);
+}
+
+.st-btn-hero {
+  height: 48px;
+  padding: 0 26px;
+  font-size: 15px;
+  border-radius: var(--st-radius-md);
+  letter-spacing: 0.02em;
+}
+
+.st-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--st-text-secondary);
+}
+
+.st-btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--st-text-primary);
+  border-color: transparent;
+}
+
+.st-btn-danger {
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--st-rose);
+  background: rgba(244, 63, 94, 0.08);
+}
+.st-btn-danger:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.18);
+  border-color: var(--st-rose);
+}
+
+.st-btn-sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: var(--st-radius-sm);
+}
+
+/* ==========================================================================
+   2.0 提示词控制台 (Prompt Console)
+   ========================================================================== */
+.studio-prompt-box {
+  background: var(--st-bg-surface-1);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius-lg);
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.studio-prompt-box:focus-within {
+  border-color: var(--st-iris);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15), 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+  background: var(--st-bg-surface-2);
+}
+
+.studio-prompt-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--st-text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+  resize: vertical;
+  min-height: 98px;
+}
+
+.studio-prompt-textarea::placeholder {
+  color: var(--st-text-dim);
+}
+
+.studio-prompt-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--st-border-subtle);
+  margin-top: 6px;
+}
+
+.studio-prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studio-prompt-counter {
+  font-size: 11px;
+  font-family: var(--st-font-mono);
+  color: var(--st-text-dim);
+}
+
+/* AI 优化按钮 */
+.st-ai-btn {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2));
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #d8b4fe;
+  font-size: 12px;
+  font-weight: 500;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.st-ai-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(6, 182, 212, 0.35));
+  border-color: var(--st-iris-light);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+/* 视觉画幅比例选择卡片 (Visual Aspect Ratio Cards) */
+.studio-aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 8px;
+}
+
+.studio-aspect-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px 8px;
+  background: var(--st-bg-surface-2);
+  border: 1px solid var(--st-border-subtle);
+  border-radius: var(--st-radius-md);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  position: relative;
+}
+
+.studio-aspect-card:hover {
+  background: var(--st-bg-surface-3);
+  border-color: var(--st-border-strong);
+  transform: translateY(-2px);
+}
+
+.studio-aspect-card.selected {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: var(--st-iris);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.studio-aspect-shape-wrap {
+  height: 36px;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.studio-aspect-shape {
+  border: 1.5px solid var(--st-text-muted);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: all 0.18s ease;
+}
+
+.studio-aspect-card.selected .studio-aspect-shape {
+  border-color: var(--st-iris-light);
+  background: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+.studio-aspect-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--st-text-primary);
+  margin-bottom: 1px;
+}
+
+.studio-aspect-size {
+  font-size: 10px;
+  font-family: var(--st-font-mono);
+  color: var(--st-text-dim);
+}
+
+.studio-aspect-card.selected .studio-aspect-size {
+  color: var(--st-iris-light);
+}
+
+/* 风格预设药丸 (Style Preset Chips) */
+.studio-style-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+}
+
+.studio-style-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 18px;
+  background: var(--st-bg-surface-2);
+  border: 1px solid var(--st-border-subtle);
+  color: var(--st-text-secondary);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.16s ease;
+}
+
+.studio-style-chip:hover {
+  background: var(--st-bg-surface-3);
+  color: var(--st-text-primary);
+  border-color: var(--st-border-strong);
+  transform: translateY(-1px);
+}
+
+.studio-style-chip.active {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--st-iris);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+
+/* ==========================================================================
+   2.0 结果大画布与展台 (Result Showcase Canvas)
+   ========================================================================== */
+.studio-result-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 480px;
+}
+
+.studio-hero-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.studio-hero-viewport {
+  position: relative;
+  width: 100%;
+  border-radius: var(--st-radius-lg);
+  border: 1px solid var(--st-border);
+  background: #090b10;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 520px;
+  max-height: calc(100vh - 260px);
+  min-height: 380px;
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7);
+  padding: 16px;
+  box-sizing: border-box;
+  cursor: zoom-in;
+}
+
+.studio-hero-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  margin: auto;
+  display: block;
+  border-radius: var(--st-radius-sm);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.studio-hero-viewport:hover .studio-hero-image {
+  transform: scale(1.015);
+}
+
+/* 独立快捷操作栏 (移出画布下方，绝不遮挡成果细节) */
+.studio-hero-dock-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 28px;
+  background: rgba(13, 16, 25, 0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  margin-top: 12px;
+}
+
+.studio-dock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  color: var(--st-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.studio-dock-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.studio-dock-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* 缩略胶卷条 (Filmstrip) */
+.studio-filmstrip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+}
+
+.studio-filmstrip-item {
+  width: 84px;
+  height: 84px;
+  flex: 0 0 84px;
+  border-radius: var(--st-radius-md);
+  border: 2px solid transparent;
+  background: var(--st-bg-surface-2);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.18s ease;
+}
+
+.studio-filmstrip-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.studio-filmstrip-item:hover {
+  border-color: var(--st-border-strong);
+  transform: translateY(-2px);
+}
+
+.studio-filmstrip-item.active {
+  border-color: var(--st-iris);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
+}
+
+/* 生成中进度条 (Cinematic Progress Shimmer) */
+.studio-progress-card {
+  padding: 20px 24px;
+  border-radius: var(--st-radius-lg);
+  background: var(--st-bg-glass-card);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(124, 58, 237, 0.15);
+}
+
+.studio-progress-beam-track {
+  height: 8px;
+  border-radius: 8px;
+  background: var(--st-bg-surface-3);
+  overflow: hidden;
+  position: relative;
+  margin: 14px 0 12px;
+}
+
+.studio-progress-beam-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--st-iris-gradient);
+  position: relative;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 14px var(--st-iris);
+}
+
+.studio-progress-beam-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer-beam 1.8s infinite;
+}
+
+@keyframes shimmer-beam {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 空状态 (Empty Inspiring State) */
+.studio-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  border: 1px dashed var(--st-border);
+  border-radius: var(--st-radius-xl);
+  background: rgba(14, 18, 28, 0.4);
+}
+
+.studio-empty-icon-wrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--st-iris-light);
+  margin-bottom: 16px;
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.2);
+}
+
+.studio-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--st-text-primary);
+  margin-bottom: 6px;
+}
+
+.studio-empty-desc {
+  font-size: 13px;
+  color: var(--st-text-muted);
+  max-width: 420px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.studio-quick-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 580px;
+}
+
+.studio-quick-prompt-tag {
+  font-size: 12px;
+  color: var(--st-text-secondary);
+  background: var(--st-bg-surface-2);
+  border: 1px solid var(--st-border-subtle);
+  padding: 6px 13px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.studio-quick-prompt-tag:hover {
+  background: var(--st-bg-surface-3);
+  color: var(--st-text-primary);
+  border-color: var(--st-border-strong);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   2.0 视频时间线工作室 (Video Studio Timeline)
+   ========================================================================== */
+.studio-video-timeline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--st-bg-surface-1);
+  border-radius: var(--st-radius-lg);
+  border: 1px solid var(--st-border);
+}
+
+.studio-timeline-slot {
+  flex: 1;
+}
+
+.studio-timeline-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--st-cyan);
+}
+
+.studio-timeline-pulse {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   全局组件在 2.0 Studio 模式下的质感提升 (Global UI Refinements)
+   ========================================================================== */
+
+/* 卡片升级 */
+.studio-shell .card {
+  background: var(--st-bg-glass-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius-lg);
+  box-shadow: var(--st-shadow-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.studio-shell .card:hover {
+  border-color: rgba(255, 255, 255, 0.13);
+}
+
+/* 按钮质感 */
+.studio-shell .btn {
+  background: var(--st-bg-surface-2);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius-md);
+  color: var(--st-text-primary);
+  font-weight: 500;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.studio-shell .btn:hover:not(:disabled) {
+  background: var(--st-bg-surface-3);
+  border-color: var(--st-border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.studio-shell .btn.primary {
+  background: var(--st-iris-gradient);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+}
+
+.studio-shell .btn.primary:hover:not(:disabled) {
+  background: var(--st-iris-gradient-hover);
+  box-shadow: 0 6px 22px rgba(124, 58, 237, 0.5);
+}
+
+.studio-shell .btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--st-text-secondary);
+}
+
+.studio-shell .btn.ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* 输入框质感 */
+.studio-shell .input,
+.studio-shell .textarea,
+.studio-shell .select {
+  background: var(--st-bg-surface-1);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius-sm);
+  color: var(--st-text-primary);
+  transition: all 0.18s ease;
+}
+
+.studio-shell .input:focus,
+.studio-shell .textarea:focus,
+.studio-shell .select:focus {
+  border-color: var(--st-iris);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  background: var(--st-bg-surface-2);
+}
+
+/* 标签药丸 */
+.studio-shell .pill {
+  border-radius: 14px;
+  font-weight: 500;
+  border: 1px solid var(--st-border-subtle);
+  background: var(--st-bg-surface-2);
+}
+
+.studio-shell .pill.accent {
+  background: rgba(139, 92, 246, 0.16);
+  border-color: rgba(139, 92, 246, 0.35);
+  color: var(--st-iris-light);
+}
+
+.studio-shell .pill.ok {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--st-emerald);
+}
+
+.studio-shell .pill.warn {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--st-amber);
+}
+
+.studio-shell .pill.err {
+  background: rgba(244, 63, 94, 0.14);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--st-rose);
+}
+
+/* 图片槽 */
+.studio-shell .slot {
+  background: var(--st-bg-surface-1);
+  border: 1.5px dashed var(--st-border);
+  border-radius: var(--st-radius-md);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.studio-shell .slot:hover {
+  border-color: var(--st-iris);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+/* 图片槽上传按钮防溢出与美化 */
+.studio-shell .slot-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.studio-shell .slot-cta {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--st-text-secondary);
+  border-radius: 6px;
+  font-size: 11px;
+  height: 23px;
+  padding: 0 7px;
+  white-space: nowrap;
+}
+
+.studio-shell .slot-cta:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.25);
+}
+
+/* 历史卡片 */
+.studio-shell .hist-item {
+  border-radius: var(--st-radius-lg);
+  border: 1px solid var(--st-border);
+  background: var(--st-bg-glass-card);
+  transition: all 0.2s ease;
+}
+
+.studio-shell .hist-item:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5);
+}
+
+/* 图库卡片 */
+.studio-shell .lib-item {
+  border-radius: var(--st-radius-md);
+  border: 1px solid var(--st-border-subtle);
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.studio-shell .lib-item:hover {
+  border-color: var(--st-iris);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(139, 92, 246, 0.3);
+}
+
+/* 分段选择器 */
+.studio-shell .seg {
+  background: var(--st-bg-surface-1);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius-md);
+  padding: 3px;
+  gap: 3px;
+}
+
+.studio-shell .seg button {
+  border-radius: var(--st-radius-sm);
+  font-weight: 500;
+  transition: all 0.16s ease;
+}
+
+.studio-shell .seg button.on {
+  background: var(--st-iris-gradient);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "画境默认能力：允许前端调用核心命令与监听后端事件（生成进度、后端日志）。",
+  "windows": ["*"],
+  "permissions": ["core:default"]
+}
