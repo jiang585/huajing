@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** 设置：目录、默认参数、2K 精修参数、模型自检。 */
 
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import {
   FolderOpen,
   RotateCcw,
@@ -62,6 +62,7 @@ const probeOk = ref("");
 // 版本号连点计数（隐私空间的隐藏入口）
 const taps = ref(0);
 let tapTimer: number | null = null;
+let pairingRefreshTimer: number | null = null;
 
 /** 应用依赖的模型文件，缺任何一个对应功能就跑不起来 */
 const REQUIRED: { folder: string; name: string }[] = [
@@ -91,6 +92,14 @@ onMounted(async () => {
     pairingCode.value = await lanPairingCode();
     pairedDevices.value = await lanDevices();
   } catch { /* older backend */ }
+  pairingRefreshTimer = window.setInterval(async () => {
+    try { pairedDevices.value = await lanDevices(); } catch { /* backend may be stopping */ }
+  }, 2000);
+});
+
+onUnmounted(() => {
+  if (pairingRefreshTimer !== null) window.clearInterval(pairingRefreshTimer);
+  pairingRefreshTimer = null;
 });
 
 async function revokeDevice(deviceId: string) {
