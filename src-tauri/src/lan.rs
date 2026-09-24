@@ -185,7 +185,7 @@ async fn health(State(state): State<Arc<LanState>>) -> impl IntoResponse {
     let zimage = root.join("models").join("diffusion_models").join("z_image_turbo_int8_convrot.safetensors").is_file()
         && root.join("models").join("text_encoders").join("qwen_3_4b_fp8_mixed.safetensors").is_file();
     Json(json!({
-        "service":"huajing", "version":"1.2.0",
+        "service":"huajing", "version":state.app.package_info().version.to_string(),
         "comfyui": if status.running { "ready" } else { "stopped" },
         "comfyManaged": status.managed,
         "models": { "qwenImage21": qwen, "zImage": zimage },
