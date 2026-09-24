@@ -20,6 +20,10 @@ use tokio::time::{sleep, Duration};
 use crate::{comfy, store};
 
 const PORT: u16 = 17890;
+/// UDP beacon port used only for finding a Huajing instance after its LAN IP changes.
+/// No credentials are sent in the beacon; the phone still validates the saved token
+/// through `/v1/connection` before accepting an address.
+const DISCOVERY_PORT: u16 = 17891;
 const STORE_NAME: &str = "lan_devices";
 
 #[derive(Clone)]
@@ -108,6 +112,7 @@ pub fn start(app: AppHandle) -> Arc<LanState> {
     tauri::async_runtime::spawn(async move {
         let router = Router::new()
             .route("/v1/health", get(health))
+            .route("/v1/connection", get(connection))
             .route("/v1/pairing/claim", post(pair))
             .route("/v1/assets/:sha256", put(upload_asset))
             .route("/v1/assets/:asset_id/content", get(download_asset))
@@ -120,7 +125,26 @@ pub fn start(app: AppHandle) -> Arc<LanState> {
         };
         if let Err(error) = axum::serve(listener, router).await { eprintln!("Huajing LAN bridge stopped: {error}"); }
     });
+    start_discovery_beacon();
     state
+}
+
+fn start_discovery_beacon() {
+    tauri::async_runtime::spawn(async move {
+        let socket = match tokio::net::UdpSocket::bind(("0.0.0.0", 0)).await {
+            Ok(socket) => socket,
+            Err(error) => { eprintln!("Huajing LAN discovery beacon unavailable: {error}"); return; }
+        };
+        if let Err(error) = socket.set_broadcast(true) {
+            eprintln!("Huajing LAN discovery beacon unavailable: {error}");
+            return;
+        }
+        let payload = br#"{"service":"huajing","protocol":1,"port":17890}"#;
+        loop {
+            let _ = socket.send_to(payload, ("255.255.255.255", DISCOVERY_PORT)).await;
+            sleep(Duration::from_secs(2)).await;
+        }
+    });
 }
 
 #[tauri::command]
@@ -168,6 +192,13 @@ async fn health(State(state): State<Arc<LanState>>) -> impl IntoResponse {
         "canGenerate": status.running && (qwen || zimage),
         "root": status.root
     }))
+}
+
+async fn connection(State(state): State<Arc<LanState>>, headers: HeaderMap) -> impl IntoResponse {
+    if !state.authorized(&headers) {
+        return (StatusCode::UNAUTHORIZED, Json(json!({"error":"UNAUTHORIZED"}))).into_response();
+    }
+    Json(json!({"service":"huajing","protocol":1,"port":PORT})).into_response()
 }
 
 async fn pair(State(state): State<Arc<LanState>>, Json(input): Json<PairRequest>) -> impl IntoResponse {
