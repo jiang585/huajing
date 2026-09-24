@@ -141,6 +141,18 @@ export const comfyQueue = () =>
 
 export const lanPairingCode = () => invoke<string>("lan_pairing_code");
 export const lanDevices = () => invoke<Array<{ deviceId: string; deviceName: string; appInstanceId: string; createdAt: number; lastSeenAt: number }>>("lan_devices");
+export interface LanJob {
+  jobId: string;
+  clientJobId: string;
+  status: string;
+  stage: string;
+  progress: number;
+  resultAssetId: string | null;
+  errorCode: string | null;
+  startedAt: number | null;
+  finishedAt: number | null;
+}
+export const lanJobs = () => invoke<LanJob[]>("lan_jobs");
 export const lanRevokeDevice = (deviceId: string) => invoke<boolean>("lan_revoke_device", { deviceId });
 
 // ---------------------------------------------------------------- 任务

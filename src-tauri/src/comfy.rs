@@ -669,11 +669,9 @@ pub async fn comfy_status(state: tauri::State<'_, ComfyState>) -> Result<ComfySt
 
 // ---------------------------------------------------------------- 启停
 
-#[tauri::command]
-pub async fn comfy_start(
-    app: AppHandle,
-    state: tauri::State<'_, ComfyState>,
-) -> Result<ComfyStatus, String> {
+/// 确保 ComfyUI 已监听 API 端口。局域网 RolePlay 任务也必须走这条路径，
+/// 不能只依赖桌面端按钮先手动启动。
+pub async fn start_if_needed(app: &AppHandle, state: &ComfyState) -> Result<ComfyStatus, String> {
     // 串行化：第二个调用者等第一次启动结束，然后看到已经就绪的状态，
     // 而不是在后端还没监听 8188 时被告知"启动完成"。
     let _guard = state.start_lock.lock().await;
@@ -764,6 +762,14 @@ pub async fn comfy_start(
     Err(format!(
         "ComfyUI 启动超时（180 秒内未监听 8188），进程仍在运行（PID {pid_text}）。\n日志最后几行：\n{tail}"
     ))
+}
+
+#[tauri::command]
+pub async fn comfy_start(
+    app: AppHandle,
+    state: tauri::State<'_, ComfyState>,
+) -> Result<ComfyStatus, String> {
+    start_if_needed(&app, &state).await
 }
 
 #[tauri::command]

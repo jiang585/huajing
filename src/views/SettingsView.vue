@@ -33,8 +33,10 @@ import {
   deepseekModels,
   lanPairingCode,
   lanDevices,
+  lanJobs,
   lanRevokeDevice,
 } from "../api/tauri";
+import type { LanJob } from "../api/tauri";
 import { settings, saveSettings, resetSettings, SIZE_PRESETS, dataDir } from "../stores/settings";
 import { backend, refreshLogs } from "../stores/backend";
 import { vault } from "../stores/vault";
@@ -52,6 +54,7 @@ const storeDir = ref("");
 const version = ref("");
 const pairingCode = ref("");
 const pairedDevices = ref<Array<{ deviceId: string; deviceName: string; appInstanceId: string; createdAt: number; lastSeenAt: number }>>([]);
+const roleplayJobs = ref<LanJob[]>([]);
 
 // DeepSeek
 const showKey = ref(false);
@@ -91,11 +94,22 @@ onMounted(async () => {
   try {
     pairingCode.value = await lanPairingCode();
     pairedDevices.value = await lanDevices();
+    roleplayJobs.value = await lanJobs();
   } catch { /* older backend */ }
   pairingRefreshTimer = window.setInterval(async () => {
-    try { pairedDevices.value = await lanDevices(); } catch { /* backend may be stopping */ }
+    try {
+      pairedDevices.value = await lanDevices();
+      roleplayJobs.value = await lanJobs();
+    } catch { /* backend may be stopping */ }
   }, 2000);
 });
+
+function jobElapsed(job: LanJob): string {
+  if (!job.startedAt) return "未开始";
+  const end = job.finishedAt ?? Date.now();
+  const seconds = Math.max(0, Math.floor((end - job.startedAt) / 1000));
+  return `${Math.floor(seconds / 60)}分${seconds % 60}秒`;
+}
 
 onUnmounted(() => {
   if (pairingRefreshTimer !== null) window.clearInterval(pairingRefreshTimer);
@@ -281,6 +295,17 @@ async function selfCheck() {
         <div v-for="device in pairedDevices" :key="device.deviceId" class="flex" style="margin-top: 6px">
           <span class="mono" style="flex: 1">{{ device.deviceName }} · {{ device.deviceId.slice(0, 8) }}</span>
           <button class="btn ghost" @click="revokeDevice(device.deviceId)"><Trash2 :size="13" /> 删除</button>
+        </div>
+      </div>
+      <div class="field" v-if="roleplayJobs.length">
+        <label class="label">RolePlay 生图任务</label>
+        <div v-for="job in roleplayJobs.slice(0, 5)" :key="job.jobId" class="lan-job">
+          <div class="flex" style="justify-content: space-between">
+            <span>{{ job.stage || job.status }}</span>
+            <span class="mono">{{ Math.round((job.progress || 0) * 100) }}%</span>
+          </div>
+          <div class="lan-job-meta">{{ job.status }} · 已用时 {{ jobElapsed(job) }}</div>
+          <div v-if="job.errorCode" class="lan-job-error">{{ job.errorCode }}</div>
         </div>
       </div>
       <div class="hint">电脑端删除调用端后，手机需要重新配对；日常生成不需要重复扫码。</div>
@@ -584,6 +609,14 @@ async function selfCheck() {
   flex-direction: column;
   gap: 6px;
 }
+.lan-job {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+}
+.lan-job-meta { color: var(--text-3); font-size: 11px; margin-top: 3px; }
+.lan-job-error { color: var(--err); font-size: 11px; margin-top: 3px; white-space: pre-wrap; }
 .check-row {
   display: flex;
   align-items: center;

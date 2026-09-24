@@ -119,6 +119,7 @@ pub fn run() {
             vault::vault_name,
             lan::lan_pairing_code,
             lan::lan_devices,
+            lan::lan_jobs,
             lan::lan_revoke_device,
         ])
         .run(tauri::generate_context!())

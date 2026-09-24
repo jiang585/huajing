@@ -50,6 +50,8 @@ struct JobRecord {
     progress: f32,
     result_asset_id: Option<String>,
     error_code: Option<String>,
+    started_at: Option<i64>,
+    finished_at: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -133,13 +135,40 @@ pub fn lan_devices(state: tauri::State<'_, Arc<LanState>>) -> Vec<serde_json::Va
 }
 
 #[tauri::command]
+pub fn lan_jobs(state: tauri::State<'_, Arc<LanState>>) -> Vec<serde_json::Value> {
+    let mut jobs: Vec<_> = state.jobs.lock().unwrap().values().cloned().collect();
+    jobs.sort_by_key(|job| std::cmp::Reverse(job.started_at.unwrap_or(0)));
+    jobs.into_iter().map(|job| json!({
+        "jobId": job.job_id, "clientJobId": job.client_job_id, "status": job.status,
+        "stage": job.stage, "progress": job.progress, "resultAssetId": job.result_asset_id,
+        "errorCode": job.error_code, "startedAt": job.started_at, "finishedAt": job.finished_at
+    })).collect()
+}
+
+#[tauri::command]
 pub fn lan_revoke_device(state: tauri::State<'_, Arc<LanState>>, device_id: String) -> Result<bool, String> {
     let removed = state.devices.lock().unwrap().remove(&device_id).is_some();
     if removed { tauri::async_runtime::block_on(state.persist_devices()); }
     Ok(removed)
 }
 
-async fn health() -> impl IntoResponse { Json(json!({"service":"huajing","version":"1.2.0","comfyui":"ready","models":{"qwenImage21":true,"zImage":true}})) }
+async fn health(State(state): State<Arc<LanState>>) -> impl IntoResponse {
+    let comfy_state = state.app.state::<comfy::ComfyState>();
+    let status = comfy::status_of(&comfy_state).await;
+    let root = std::path::PathBuf::from(&status.root);
+    let qwen = root.join("models").join("diffusion_models").join("qwen_image_2.1_int8_convrot.safetensors").is_file()
+        && root.join("models").join("text_encoders").join("qwen3vl_8b_int8_convrot.safetensors").is_file();
+    let zimage = root.join("models").join("diffusion_models").join("z_image_turbo_int8_convrot.safetensors").is_file()
+        && root.join("models").join("text_encoders").join("qwen_3_4b_fp8_mixed.safetensors").is_file();
+    Json(json!({
+        "service":"huajing", "version":"1.2.0",
+        "comfyui": if status.running { "ready" } else { "stopped" },
+        "comfyManaged": status.managed,
+        "models": { "qwenImage21": qwen, "zImage": zimage },
+        "canGenerate": status.running && (qwen || zimage),
+        "root": status.root
+    }))
+}
 
 async fn pair(State(state): State<Arc<LanState>>, Json(input): Json<PairRequest>) -> impl IntoResponse {
     if input.pairing_code != state.pairing_code { return (StatusCode::UNAUTHORIZED, Json(json!({"error":"PAIRING_CODE_INVALID"}))).into_response(); }
@@ -174,7 +203,7 @@ async fn create_job(State(state): State<Arc<LanState>>, headers: HeaderMap, Json
     if input.model == "qwenimage2.1" && input.mode != "edit" && input.mode != "multiref" { return (StatusCode::BAD_REQUEST, Json(json!({"error":"QWEN_MODE_INVALID"}))).into_response(); }
     if input.model == "qwenimage2.1" && input.references.is_empty() { return (StatusCode::BAD_REQUEST, Json(json!({"error":"QWEN_REFERENCE_REQUIRED"}))).into_response(); }
     let job_id = uuid::Uuid::new_v4().to_string();
-    let record = JobRecord { job_id: job_id.clone(), client_job_id: input.client_job_id.clone(), status: "QUEUED".into(), stage: "等待执行".into(), progress: 0.0, result_asset_id: None, error_code: None };
+    let record = JobRecord { job_id: job_id.clone(), client_job_id: input.client_job_id.clone(), status: "QUEUED".into(), stage: "等待执行".into(), progress: 0.0, result_asset_id: None, error_code: None, started_at: None, finished_at: None };
     state.jobs.lock().unwrap().insert(job_id.clone(), record);
     let worker_state = state.clone(); let worker_job = job_id.clone();
     tauri::async_runtime::spawn(async move { run_job(worker_state, worker_job, input).await; });
@@ -201,6 +230,9 @@ async fn run_job(state: Arc<LanState>, job_id: String, input: GenerationRequest)
 
 async fn execute_job(state: &LanState, job_id: &str, input: &GenerationRequest) -> Result<String, String> {
     let comfy_state = state.app.state::<comfy::ComfyState>();
+    set_job(state, job_id, "RUNNING", "启动 ComfyUI", 0.02, None, None);
+    comfy::start_if_needed(&state.app, &comfy_state).await?;
+    comfy::ensure_ws(&state.app).await?;
     let mut names = Vec::new();
     for reference in &input.references {
         let path = state.assets.lock().unwrap().get(&reference.asset_id).cloned().ok_or_else(|| "REFERENCE_NOT_FOUND".to_string())?;
@@ -210,7 +242,7 @@ async fn execute_job(state: &LanState, job_id: &str, input: &GenerationRequest) 
     set_job(state, job_id, "RUNNING", "提交 ComfyUI", 0.15, None, None);
     let graph = build_graph(input, &names)?;
     let queued = comfy::queue_prompt_to(&comfy_state.http, &graph, &comfy_state.client_id).await?;
-    for _ in 0..600 {
+    for poll in 0..600 {
         if let Some(history) = comfy::history_of(&comfy_state.http, &queued.prompt_id).await? {
             if let Some((filename, subfolder, kind)) = first_output(&history) {
                 let output_dir = comfy::app_data_dir(&state.app).join("lan_outputs"); tokio::fs::create_dir_all(&output_dir).await.map_err(|e| e.to_string())?;
@@ -219,7 +251,8 @@ async fn execute_job(state: &LanState, job_id: &str, input: &GenerationRequest) 
                 let asset_id = format!("result_{job_id}"); state.assets.lock().unwrap().insert(asset_id.clone(), path); return Ok(asset_id);
             }
         }
-        set_job(state, job_id, "RUNNING", "生成中", 0.2, None, None); sleep(Duration::from_millis(1200)).await;
+        let progress = 0.2 + (poll as f32 / 600.0) * 0.75;
+        set_job(state, job_id, "RUNNING", "生成中", progress.min(0.95), None, None); sleep(Duration::from_millis(1200)).await;
     }
     Err("GENERATION_TIMEOUT".into())
 }
@@ -265,7 +298,14 @@ fn build_graph(input: &GenerationRequest, references: &[String]) -> Result<Value
     Ok(Value::Object(graph))
 }
 
-fn set_job(state: &LanState, id: &str, status: &str, stage: &str, progress: f32, asset: Option<String>, error: Option<String>) { if let Some(job) = state.jobs.lock().unwrap().get_mut(id) { job.status=status.into(); job.stage=stage.into(); job.progress=progress; job.result_asset_id=asset; job.error_code=error; } }
+fn set_job(state: &LanState, id: &str, status: &str, stage: &str, progress: f32, asset: Option<String>, error: Option<String>) {
+    if let Some(job) = state.jobs.lock().unwrap().get_mut(id) {
+        let now = chrono::Utc::now().timestamp_millis();
+        job.status=status.into(); job.stage=stage.into(); job.progress=progress; job.result_asset_id=asset; job.error_code=error;
+        if status == "RUNNING" && job.started_at.is_none() { job.started_at = Some(now); }
+        if matches!(status, "READY" | "FAILED_RETRYABLE" | "FAILED_FINAL" | "CANCELLED") { job.finished_at = Some(now); }
+    }
+}
 fn server_error(message: String) -> Response { (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"error":message}))).into_response() }
 
 fn token_hash(token: &str) -> String {
